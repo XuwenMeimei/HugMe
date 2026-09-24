@@ -44,10 +44,9 @@ public final class HugAnimationManager {
                 player -> player instanceof AbstractClientPlayer ? createLayer() : null);
 
         if (HugCompatibility.isYesSteveModelLoaded()) {
-            HugMe.LOGGER.info("Yes Steve Model detected. Everything except the hug pose itself works as"
-                    + " usual; YSM renders its own models with its own animations, which cannot be driven"
-                    + " from outside, so the hug pose will not show on YSM models. Shadow and name tag"
-                    + " hiding is {} for this client.", HugCompatibility.hideShadowAndNameTag() ? "kept on" : "skipped");
+            HugMe.LOGGER.warn("Yes Steve Model detected. YSM renders its own player models with its own"
+                    + " animations, which cannot be driven from outside, so the hug pose could never show."
+                    + " Hug Me is disabled for this client: no command, no menu, no requests.");
         }
     }
 

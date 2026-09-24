@@ -27,7 +27,7 @@
   "hugme.message.accept_too_far": "You are too far from %s, you need to be within %s blocks",
   "hugme.message.force_stopped": "Hug force ended (double tap Shift)",
   "hugme.ysm.warning.title": "Yes Steve Model detected",
-  "hugme.ysm.warning.body": "This modpack contains Yes Steve Model (YSM). YSM takes over the player model and its animations, while this mod's hug animations are Player Animator based and cannot be applied to YSM models - so the hug pose would never show.\n\nHugMe has therefore disabled itself: no /hugme command, no interaction menu and no hug requests are accepted.\n\nIf you still want to use it (menu, stand placement and the movement lock keep working, only the hug pose is missing), set disable_with_ysm to false in config/hugme-common.toml and restart the game.",
+  "hugme.ysm.warning.body": "This modpack contains Yes Steve Model (YSM). YSM takes over the player model and its animations, while this mod's hug animations are Player Animator based and cannot be applied to YSM models - so the hug pose would never show.\n\nHugMe has therefore disabled itself for good: no /hugme command, no interaction menu and no hug requests are accepted.\n\nThis cannot be turned off in the config. To use HugMe, remove Yes Steve Model from the pack.",
   "hugme.ysm.disabled": "HugMe is disabled: this modpack contains Yes Steve Model",
   "hugme.network.failed": "HugMe: networking failed %s"
 }

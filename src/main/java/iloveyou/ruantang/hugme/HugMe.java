@@ -32,8 +32,9 @@ public final class HugMe {
         // Per animation stand distance and the start alignment toggle; see HugConfig for why.
         modContainer.registerConfig(ModConfig.Type.COMMON, HugConfig.SPEC);
         if (HugCompatibility.isYesSteveModelLoaded()) {
-            LOGGER.warn("Yes Steve Model detected in this pack. See disable_with_ysm in"
-                    + " config/hugme-common.toml - the hug animation cannot be shown on YSM models.");
+            LOGGER.warn("Yes Steve Model detected in this pack: Hug Me is disabled. The hug animation"
+                    + " cannot be shown on YSM models, and there is no way to turn the mod back on"
+                    + " while YSM is installed.");
         }
         LOGGER.info("Hug Me! (animation + command edition) loaded");
     }

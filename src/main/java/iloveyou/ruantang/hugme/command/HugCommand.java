@@ -51,8 +51,7 @@ public final class HugCommand {
         if (HugCompatibility.isDisabled()) {
             // Yes Steve Model is in the pack and the mod switched itself off; not having the command
             // at all is clearer than having one that always fails.
-            HugMe.LOGGER.warn("Yes Steve Model detected: /hugme is not registered (see disable_with_ysm"
-                    + " in config/hugme-common.toml).");
+            HugMe.LOGGER.warn("Yes Steve Model detected: /hugme is not registered, Hug Me is disabled.");
             return;
         }
         register(event.getDispatcher());

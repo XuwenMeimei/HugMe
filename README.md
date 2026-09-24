@@ -219,7 +219,7 @@ src/main/java/iloveyou/ruantang/hugme/
 │  ├─ HugConfig.java                配置：front_distance / align_on_start / 覆盖层开关
 │  ├─ HugSession.java               单场拥抱的状态（锁定锚点、观众、剩余 tick）
 │  ├─ HugManager.java               服务端：请求、接受、落位、锁位、广播、清理
-│  └─ HugCompatibility.java         运行时兼容判定（YSM 等）
+│  └─ HugCompatibility.java         运行时兼容判定（YSM 检测 → 强制停用）
 ├─ command/HugCommand.java          /hugme 指令
 ├─ network/                         hug / hug_request / hug_accept / hug_stop / hug_prompt
 ├─ client/
@@ -241,7 +241,7 @@ src/main/resources/
    └─ player_animations/{normal,touch}_{s,r}.json   关键帧动画数据（沿用原作）
 ```
 
-## 与 Yes Steve Model（YSM）共存
+## 与 Yes Steve Model（YSM）冲突：强制停用
 
 YSM 会接管玩家模型与动画（Bedrock 格式，渲染核心为 C++），**并且没有对外 API**：我核对了它当前的
 1.21.1 NeoForge 发布制品 `ysm-2.6.5-neoforge+mc1.21.1-release.jar`，包内只有
@@ -250,18 +250,17 @@ YSM 会接管玩家模型与动画（Bedrock 格式，渲染核心为 C++），*
 且按其设计文档，adapter 只能把外部模组状态投影为有限输入（Molang query / controller predicate /
 render-context hint）——**动画本身必须由模型包自带**。
 
-因此模组**默认在检测到 YSM 时自行停用**（配置项 `disable_with_ysm`，默认 `true`）：
+因此只要检测到 YSM，模组就**强制停用，且没有任何开关可以绕过**：
 
-- 客户端启动后（标题界面）**弹出警告屏**，说明原因与恢复方式（`HugWarning`）；
+- 客户端启动后（标题界面）**弹出警告屏**，说明原因（`HugWarning`）；
 - **不注册 `/hugme` 指令**、不打开互动菜单、不接受任何拥抱请求；
 - 服务端侧同样拒绝请求，并在日志打印警告；
 - 检测只依赖模组 id `yes_steve_model`，**不需要任何 YSM 编译期依赖**，且探针异常会被吞掉、不影响模组加载。
 
-如果你仍然想用，把 `disable_with_ysm` 改成 `false`：菜单、按键接受、HUD 提示、精确落位、移动锁、
-人称切换与恢复、双击 Shift 强制结束都会照常工作，**只有拥抱姿势本身不会显示**——我们的动画基于
-Player Animator、作用于原版模型骨骼，要让 YSM 玩家有拥抱动作只能由**该模型包的作者**在模型内补一段动画。
-此时模组还会因为 YSM 模型没有原版动画那 1 格身体位移，**自动跳过阴影 / nametag 隐藏**
-（`hide_shadow_and_nametag_with_ysm`，默认 `false`）。
+> 为什么不做共存：菜单、按键接受、HUD 提示、精确落位、移动锁、人称切换与恢复这些即使装了 YSM 也能跑，
+> 但**拥抱姿势本身永远不会显示**——我们的动画基于 Player Animator、作用于原版模型骨骼，要让 YSM 玩家有
+> 拥抱动作只能由**该模型包的作者**在模型内补一段动画。留着"能跑一半"的模式只会让人以为模组坏了、
+> 并制造一堆难查的 bug，所以这个口子直接关掉。想用 Hug Me，请先从整合包里移除 YSM。
 
 > 给 YSM 模型作者：等 YSM 3.0 的扩展 API 稳定后，可按其 adapter 边界把「正在拥抱」作为
 > render-context hint / Molang 输入暴露给模型包，再由模型内的 controller 播放对应动画。
