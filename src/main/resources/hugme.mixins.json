@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "nya.tuyw.hugme.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "InputMixin",
+    "KeyboardHandlerMixin",
+    "LivingEntityRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

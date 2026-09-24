@@ -1,0 +1,14 @@
+# Normalise everything to LF in the repository, so the shell scripts (gradlew) keep working
+# on Linux and macOS checkouts.
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.jar binary
+*.png binary
+*.zip binary
+
+# Disable autocrlf on generated files, they always generate with LF
+# Add any extra files or paths here to make git stop saying they
+# are changed when only line endings change.
+src/generated/**/.cache/* text eol=lf
+src/generated/**/*.json text eol=lf

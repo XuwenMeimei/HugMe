@@ -1,0 +1,154 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.144'
+    id 'idea'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = "${mod_id}-neoforge-${minecraft_version}"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+// Keep Chinese sources readable on Windows (GBK default console/compiler charset)
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+    exclude("**/*.bbmodel")
+    exclude("src/generated/**/.cache")
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        name = "KosmX's maven"
+        url = 'https://maven.kosmx.dev/'
+        content {
+            includeGroup("dev.kosmx.player-anim")
+        }
+    }
+}
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
+        // Optional auto-join for multiplayer testing:
+        //   gradlew runClient  -PquickPlay=localhost:25565
+        //   gradlew runClient2 -PquickPlay=localhost:25565
+        def quickPlay = providers.gradleProperty('quickPlay')
+
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            jvmArgument '-Xmx1536M'
+            jvmArgument '-Xms512M'
+            if (quickPlay.isPresent()) {
+                programArgument '--quickPlayMultiplayer'
+                programArgument quickPlay.get()
+            }
+        }
+
+        // Second client for multiplayer testing: own game directory and own user name, otherwise
+        // both clients would fight over run/ and the server would reject the duplicate name.
+        client2 {
+            client()
+            gameDirectory = project.file('run2')
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            programArgument '--username'
+            programArgument 'Dev2'
+            jvmArgument '-Xmx1536M'
+            jvmArgument '-Xms512M'
+            if (quickPlay.isPresent()) {
+                programArgument '--quickPlayMultiplayer'
+                programArgument quickPlay.get()
+            }
+        }
+
+        // Own game directory as well, so the server can run next to a client.
+        server {
+            server()
+            gameDirectory = project.file('run-server')
+            programArgument '--nogui'
+            jvmArgument '-Xmx1G'
+            jvmArgument '-Xms512M'
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+    // Player Animator: client side animation playback library (mod id: playeranimator)
+    implementation "dev.kosmx.player-anim:player-animation-lib-forge:${player_animation_version}"
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/repo"
+        }
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
