@@ -56,4 +56,15 @@ public final class HugCompatibility {
     public static boolean hideShadowAndNameTag() {
         return isYesSteveModelLoaded() ? HugConfig.hideOverlaysWithYsm() : HugConfig.hideOverlays();
     }
+
+    /**
+     * @return whether the whole mod is switched off because Yes Steve Model is in the pack.
+     *
+     *         <p>YSM has no API this mod could drive, so the hug animation can never be shown on YSM
+     *         models - the mod would only pin the two players in place for six seconds while looking
+     *         like it did nothing at all. Rather than pretend, it disables itself and says so.
+     */
+    public static boolean isDisabled() {
+        return isYesSteveModelLoaded() && HugConfig.disableWithYsm();
+    }
 }

@@ -250,14 +250,18 @@ YSM 会接管玩家模型与动画（Bedrock 格式，渲染核心为 C++），*
 且按其设计文档，adapter 只能把外部模组状态投影为有限输入（Molang query / controller predicate /
 render-context hint）——**动画本身必须由模型包自带**。
 
-因此装了 YSM 时：
+因此模组**默认在检测到 YSM 时自行停用**（配置项 `disable_with_ysm`，默认 `true`）：
 
-- ✅ 菜单、按键接受、HUD 提示、精确落位、移动锁、人称切换与恢复、双击 Shift 强制结束——**全部照常**；
-- ❌ **拥抱姿势不会显示在 YSM 模型上**：本模组的动画基于 Player Animator，作用于原版模型骨骼。
-  要让 YSM 玩家有拥抱动作，只能由**该模型包的作者**在模型内补一段动画；
-- ⚙️ YSM 模型没有原版动画那 1 格身体位移，阴影本来就正确，所以模组**检测到 YSM 时会自动跳过
-  阴影 / nametag 隐藏**（配置项 `hide_shadow_and_nametag_with_ysm`，默认 `false`，需要可改 `true`）。
-  检测只依赖模组 id `yes_steve_model`，**不需要任何 YSM 编译期依赖**，且探针异常会被吞掉、不影响模组运行。
+- 客户端启动后（标题界面）**弹出警告屏**，说明原因与恢复方式（`HugWarning`）；
+- **不注册 `/hugme` 指令**、不打开互动菜单、不接受任何拥抱请求；
+- 服务端侧同样拒绝请求，并在日志打印警告；
+- 检测只依赖模组 id `yes_steve_model`，**不需要任何 YSM 编译期依赖**，且探针异常会被吞掉、不影响模组加载。
+
+如果你仍然想用，把 `disable_with_ysm` 改成 `false`：菜单、按键接受、HUD 提示、精确落位、移动锁、
+人称切换与恢复、双击 Shift 强制结束都会照常工作，**只有拥抱姿势本身不会显示**——我们的动画基于
+Player Animator、作用于原版模型骨骼，要让 YSM 玩家有拥抱动作只能由**该模型包的作者**在模型内补一段动画。
+此时模组还会因为 YSM 模型没有原版动画那 1 格身体位移，**自动跳过阴影 / nametag 隐藏**
+（`hide_shadow_and_nametag_with_ysm`，默认 `false`）。
 
 > 给 YSM 模型作者：等 YSM 3.0 的扩展 API 稳定后，可按其 adapter 边界把「正在拥抱」作为
 > render-context hint / Molang 输入暴露给模型包，再由模型内的 controller 播放对应动画。

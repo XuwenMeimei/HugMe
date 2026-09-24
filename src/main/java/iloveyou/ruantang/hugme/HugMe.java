@@ -5,6 +5,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import iloveyou.ruantang.hugme.hug.HugCompatibility;
 import iloveyou.ruantang.hugme.hug.HugConfig;
 import org.slf4j.Logger;
 
@@ -30,6 +31,10 @@ public final class HugMe {
     public HugMe(IEventBus modEventBus, ModContainer modContainer) {
         // Per animation stand distance and the start alignment toggle; see HugConfig for why.
         modContainer.registerConfig(ModConfig.Type.COMMON, HugConfig.SPEC);
+        if (HugCompatibility.isYesSteveModelLoaded()) {
+            LOGGER.warn("Yes Steve Model detected in this pack. See disable_with_ysm in"
+                    + " config/hugme-common.toml - the hug animation cannot be shown on YSM models.");
+        }
         LOGGER.info("Hug Me! (animation + command edition) loaded");
     }
 }

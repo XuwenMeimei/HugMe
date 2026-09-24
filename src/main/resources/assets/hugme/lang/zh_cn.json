@@ -26,5 +26,8 @@
   "hugme.message.nothing_to_accept": "当前没有等待你接受的拥抱",
   "hugme.message.accept_too_far": "你距离 %s 太远了",
   "hugme.message.force_stopped": "拥抱已强制结束",
+  "hugme.ysm.warning.title": "检测到 Yes Steve Model",
+  "hugme.ysm.warning.body": "本整合包中装有 Yes Steve Model（YSM）。YSM 会接管玩家模型与动画，而本模组的拥抱动画基于 Player Animator，无法作用在 YSM 模型上，所以拥抱姿势永远不会显示。\n\n因此 HugMe 已自动停用：不注册 /hugme 指令、不打开互动菜单、不接受任何拥抱请求。\n\n如果你仍想使用（菜单、站位对齐、移动锁仍可用，只是看不到拥抱姿势），请把 config/hugme-common.toml 里的 disable_with_ysm 改为 false 后重启游戏。",
+  "hugme.ysm.disabled": "HugMe 已停用：本整合包装有 Yes Steve Model",
   "hugme.network.failed": "HugMe: 网络错误 %s"
 }

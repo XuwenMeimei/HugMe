@@ -9,6 +9,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import iloveyou.ruantang.hugme.HugMe;
+import iloveyou.ruantang.hugme.hug.HugCompatibility;
 import iloveyou.ruantang.hugme.network.HugAcceptPayload;
 import org.lwjgl.glfw.GLFW;
 
@@ -33,6 +34,9 @@ public final class HugKeyMappings {
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
+        if (HugCompatibility.isDisabled()) {
+            return;
+        }
         while (ACCEPT.consumeClick()) {
             PacketDistributor.sendToServer(new HugAcceptPayload());
         }

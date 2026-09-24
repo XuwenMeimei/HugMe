@@ -22,6 +22,7 @@ public final class HugConfig {
     private static final ModConfigSpec.BooleanValue ALIGN_ON_START;
     private static final ModConfigSpec.BooleanValue HIDE_OVERLAYS;
     private static final ModConfigSpec.BooleanValue HIDE_OVERLAYS_WITH_YSM;
+    private static final ModConfigSpec.BooleanValue DISABLE_WITH_YSM;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -56,11 +57,21 @@ public final class HugConfig {
                 .define("hide_shadow_and_nametag", true);
 
         HIDE_OVERLAYS_WITH_YSM = builder
-                .comment("The same switch for clients that run Yes Steve Model.",
-                        "YSM replaces the player model and animates it with its own Bedrock animations, so the",
-                        "body offset above does not exist there and the shadow is already in the right place.",
-                        "Default off; turn it on if you still see the shadow lagging behind.")
+                .comment("The shadow / name tag switch for clients that run Yes Steve Model.",
+                        "Only relevant when disable_with_ysm is off. YSM replaces the player model and",
+                        "animates it with its own Bedrock animations, so the body offset above does not exist",
+                        "there and the shadow is already in the right place.")
                 .define("hide_shadow_and_nametag_with_ysm", false);
+
+        DISABLE_WITH_YSM = builder
+                .comment("Disable the whole mod when Yes Steve Model is in the modpack.",
+                        "YSM replaces the player model and animates it with its own Bedrock animations, and it",
+                        "has no API this mod could drive - so the hug animation can never be shown on YSM",
+                        "models, and the mod would only lock the two players in place for six seconds while",
+                        "appearing to do nothing. With this on, the mod registers no command, opens no menu and",
+                        "rejects every request, and a client shows a warning screen after start up.",
+                        "Set it to false if you still want the menu, the placement and the movement lock.")
+                .define("disable_with_ysm", true);
 
         SPEC = builder.build();
     }
@@ -83,5 +94,9 @@ public final class HugConfig {
 
     public static boolean hideOverlaysWithYsm() {
         return HIDE_OVERLAYS_WITH_YSM.get();
+    }
+
+    public static boolean disableWithYsm() {
+        return DISABLE_WITH_YSM.get();
     }
 }

@@ -18,6 +18,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import iloveyou.ruantang.hugme.HugMe;
 import iloveyou.ruantang.hugme.hug.HugAnimation;
+import iloveyou.ruantang.hugme.hug.HugCompatibility;
 import iloveyou.ruantang.hugme.hug.HugManager;
 
 import java.util.Arrays;
@@ -47,6 +48,13 @@ public final class HugCommand {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
+        if (HugCompatibility.isDisabled()) {
+            // Yes Steve Model is in the pack and the mod switched itself off; not having the command
+            // at all is clearer than having one that always fails.
+            HugMe.LOGGER.warn("Yes Steve Model detected: /hugme is not registered (see disable_with_ysm"
+                    + " in config/hugme-common.toml).");
+            return;
+        }
         register(event.getDispatcher());
     }
 

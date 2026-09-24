@@ -10,6 +10,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import iloveyou.ruantang.hugme.HugMe;
+import iloveyou.ruantang.hugme.hug.HugCompatibility;
 import iloveyou.ruantang.hugme.network.HugStopPayload;
 import org.lwjgl.glfw.GLFW;
 
@@ -38,7 +39,7 @@ public final class HugInputHandler {
     /** Right click on another player -> interaction menu. */
     @SubscribeEvent
     public static void onInteractionKeyMapping(InputEvent.InteractionKeyMappingTriggered event) {
-        if (event.isAttack() || event.isPickBlock()) {
+        if (event.isAttack() || event.isPickBlock() || HugCompatibility.isDisabled()) {
             return;
         }
         Minecraft client = Minecraft.getInstance();
@@ -62,6 +63,9 @@ public final class HugInputHandler {
     /** Double tap Shift force ends the hug. */
     @SubscribeEvent
     public static void onKey(InputEvent.Key event) {
+        if (HugCompatibility.isDisabled()) {
+            return;
+        }
         Minecraft client = Minecraft.getInstance();
         if (client.player == null) {
             return;

@@ -180,6 +180,10 @@ public final class HugManager {
      * @return {@code true} when the request was armed
      */
     public static boolean requestAndReport(ServerPlayer initiator, ServerPlayer partner, HugAnimation animation) {
+        if (HugCompatibility.isDisabled()) {
+            initiator.sendSystemMessage(Component.translatable("hugme.ysm.disabled").withStyle(ChatFormatting.RED));
+            return false;
+        }
         RequestResult result = request(initiator, partner, animation);
         if (result.failed()) {
             initiator.sendSystemMessage(result.failureMessage(partner).copy().withStyle(ChatFormatting.RED));
@@ -297,6 +301,10 @@ public final class HugManager {
      * hug from looking loose or clipped.
      */
     public static void accept(ServerPlayer partner) {
+        if (HugCompatibility.isDisabled()) {
+            partner.sendSystemMessage(Component.translatable("hugme.ysm.disabled").withStyle(ChatFormatting.RED));
+            return;
+        }
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         ArmedHug armed = findArmed(partner.getUUID());
         if (server == null || armed == null || !armed.partner.equals(partner.getUUID())) {
