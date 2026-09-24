@@ -18,6 +18,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import iloveyou.ruantang.hugme.HugMe;
 import iloveyou.ruantang.hugme.hug.HugAnimation;
+import iloveyou.ruantang.hugme.hug.HugCompatibility;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -41,6 +42,13 @@ public final class HugAnimationManager {
     public static void onClientSetup(FMLClientSetupEvent event) {
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(LAYER_ID, LAYER_PRIORITY,
                 player -> player instanceof AbstractClientPlayer ? createLayer() : null);
+
+        if (HugCompatibility.isYesSteveModelLoaded()) {
+            HugMe.LOGGER.info("Yes Steve Model detected. Everything except the hug pose itself works as"
+                    + " usual; YSM renders its own models with its own animations, which cannot be driven"
+                    + " from outside, so the hug pose will not show on YSM models. Shadow and name tag"
+                    + " hiding is {} for this client.", HugCompatibility.hideShadowAndNameTag() ? "kept on" : "skipped");
+        }
     }
 
     private static ModifierLayer<IAnimation> createLayer() {

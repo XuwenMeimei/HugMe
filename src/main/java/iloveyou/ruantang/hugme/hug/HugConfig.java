@@ -20,6 +20,8 @@ public final class HugConfig {
             new EnumMap<>(HugAnimation.class);
 
     private static final ModConfigSpec.BooleanValue ALIGN_ON_START;
+    private static final ModConfigSpec.BooleanValue HIDE_OVERLAYS;
+    private static final ModConfigSpec.BooleanValue HIDE_OVERLAYS_WITH_YSM;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -45,6 +47,21 @@ public final class HugConfig {
                         "The correction is never larger than that and the initiator is never moved.")
                 .define("align_on_start", true);
 
+        HIDE_OVERLAYS = builder
+                .comment("Hide the shadow and the name tag of the two players while a hug plays.",
+                        "Each hug animation moves the receiver's body about a block towards the sender (the torso",
+                        "position key frame), which is how the two bodies end up touching while their collision",
+                        "boxes stay apart. The shadow and the name tag are always drawn at the entity position, so",
+                        "they would lag behind the moved model - hiding them is what keeps that invisible.")
+                .define("hide_shadow_and_nametag", true);
+
+        HIDE_OVERLAYS_WITH_YSM = builder
+                .comment("The same switch for clients that run Yes Steve Model.",
+                        "YSM replaces the player model and animates it with its own Bedrock animations, so the",
+                        "body offset above does not exist there and the shadow is already in the right place.",
+                        "Default off; turn it on if you still see the shadow lagging behind.")
+                .define("hide_shadow_and_nametag_with_ysm", false);
+
         SPEC = builder.build();
     }
 
@@ -58,5 +75,13 @@ public final class HugConfig {
 
     public static boolean alignOnStart() {
         return ALIGN_ON_START.get();
+    }
+
+    public static boolean hideOverlays() {
+        return HIDE_OVERLAYS.get();
+    }
+
+    public static boolean hideOverlaysWithYsm() {
+        return HIDE_OVERLAYS_WITH_YSM.get();
     }
 }

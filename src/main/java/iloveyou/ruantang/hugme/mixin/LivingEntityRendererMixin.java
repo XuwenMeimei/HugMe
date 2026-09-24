@@ -4,6 +4,7 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import iloveyou.ruantang.hugme.client.HugClientState;
+import iloveyou.ruantang.hugme.hug.HugCompatibility;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,7 +33,9 @@ public abstract class LivingEntityRendererMixin {
     @Inject(method = "getShadowRadius(Lnet/minecraft/world/entity/LivingEntity;)F",
             at = @At("HEAD"), cancellable = true)
     private void hugme$hideShadowWhileHugging(LivingEntity entity, CallbackInfoReturnable<Float> callback) {
-        if (entity instanceof Player player && HugClientState.lockOf(player.getUUID()) != null) {
+        if (entity instanceof Player player
+                && HugClientState.lockOf(player.getUUID()) != null
+                && HugCompatibility.hideShadowAndNameTag()) {
             callback.setReturnValue(0.0F);
         }
     }

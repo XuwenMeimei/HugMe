@@ -7,6 +7,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 import net.neoforged.neoforge.common.util.TriState;
 import iloveyou.ruantang.hugme.HugMe;
+import iloveyou.ruantang.hugme.hug.HugCompatibility;
 
 /**
  * Hides the name tag of the players taking part in a hug.
@@ -24,7 +25,9 @@ public final class HugOverlayHandler {
 
     @SubscribeEvent
     public static void onRenderNameTag(RenderNameTagEvent event) {
-        if (event.getEntity() instanceof Player player && HugClientState.lockOf(player.getUUID()) != null) {
+        if (event.getEntity() instanceof Player player
+                && HugClientState.lockOf(player.getUUID()) != null
+                && HugCompatibility.hideShadowAndNameTag()) {
             event.setCanRender(TriState.FALSE);
         }
     }

@@ -155,7 +155,7 @@ align_on_start = true
 
 `animation` 可选值：`normal_hug`、`touch_head_hug`（TAB 可补全）。
 
-直接触发版仍保留了原来的玩法约束：**同一维度**、**相距不超过 5 格**、**目标身前必须有可站立空间**。
+发起请求的距离上限是 **32 格**（`MAX_REQUEST_DISTANCE`）；接受时要求 **2 格以内且大致同高度**。
 
 ## 多人测试
 
@@ -204,7 +204,7 @@ align_on_start = true
 ## 构建与运行
 
 ```bash
-./gradlew build          # 产出 build/libs/hugme-neoforge-1.21.1-1.4.0.jar
+./gradlew build          # 产出 build/libs/hugme-neoforge-1.21.1-1.4.1.jar
 ./gradlew runClient      # 开发环境启动客户端
 ./gradlew runServer      # 开发环境启动服务端
 ```
@@ -212,24 +212,52 @@ align_on_start = true
 ## 目录结构
 
 ```
-src/main/java/nya/tuyw/hugme/
-├─ HugMe.java                      模组入口
-├─ hug/HugAnimation.java           动画枚举（动画资源、时长、本地化 key）
-├─ hug/HugSession.java             单场拥抱的状态
-├─ hug/HugManager.java             服务端：对齐、锁位、可见性广播、清理
-├─ command/HugCommand.java         /hugme 指令注册
-├─ network/HugPayload.java         唯一的网络包（开始 / 结束）
-├─ network/HugClientHandler.java   客户端收包
-└─ client/
-   ├─ HugAnimationManager.java     Player Animator 图层与动画播放
-   ├─ HugClientState.java          客户端姿态锁 + 兜底过期
-   └─ PlayerLockRenderer.java      接管渲染以套用拥抱姿态
+src/main/java/iloveyou/ruantang/hugme/
+├─ HugMe.java                       模组入口、配置文件注册
+├─ hug/
+│  ├─ HugAnimation.java             动画枚举（动作资源、时长、默认站位距离）
+│  ├─ HugConfig.java                配置：front_distance / align_on_start / 覆盖层开关
+│  ├─ HugSession.java               单场拥抱的状态（锁定锚点、观众、剩余 tick）
+│  ├─ HugManager.java               服务端：请求、接受、落位、锁位、广播、清理
+│  └─ HugCompatibility.java         运行时兼容判定（YSM 等）
+├─ command/HugCommand.java          /hugme 指令
+├─ network/                         hug / hug_request / hug_accept / hug_stop / hug_prompt
+├─ client/
+│  ├─ HugMenuScreen.java            右键互动菜单
+│  ├─ HugKeyMappings.java           接受键（默认 V）
+│  ├─ HugInputHandler.java          右键开菜单 + 双击 Shift 强制结束
+│  ├─ HugPromptState.java           待接受请求的客户端状态
+│  ├─ HugPromptOverlay.java         准心右侧的悬浮提示（带底衬）
+│  ├─ HugClientState.java           姿态锁、输入锁、人称切换与恢复
+│  ├─ HugFacingHandler.java         每 tick 让参演双方朝向对方
+│  ├─ HugAnimationManager.java      Player Animator 图层与播放
+│  └─ HugOverlayHandler.java        拥抱期间隐藏 nametag
+└─ mixin/                           InputMixin / KeyboardHandlerMixin / LivingEntityRendererMixin
 
-src/main/resources/assets/hugme/
-├─ lang/{en_us,zh_cn}.json
-└─ player_animation/{normal,touch}_{s,r}.json   关键帧动画数据
+src/main/resources/
+├─ hugme.mixins.json
+└─ assets/hugme/
+   ├─ lang/{en_us,zh_cn}.json
+   └─ player_animations/{normal,touch}_{s,r}.json   关键帧动画数据（沿用原作）
 ```
 
-`PlayerLockRenderer` 里那段 `mulPose(Axis.XP.rotationDegrees(180)) + translate(0, -1.5, 0)` 与
-`yawTowards` 的角度算法是从上游**逐字保留**的：它与动画作者在 BlockBench 中使用的朝向基准绑定，
-改动会让拥抱动画明显错位。
+## 与 Yes Steve Model（YSM）共存
+
+YSM 会接管玩家模型与动画（Bedrock 格式，渲染核心为 C++），**并且没有对外 API**：我核对了它当前的
+1.21.1 NeoForge 发布制品 `ysm-2.6.5-neoforge+mc1.21.1-release.jar`，包内只有
+`com/elfmcys/yesstevemodel/**`，不存在 `api` / `event` / `capability` 任何接口；其仓库里那套
+`@YsmExtension` 扩展机制位于**未发布的 3.0 开发线**（`dev/1.20`，`mod_version=3.0-dev-*`），
+且按其设计文档，adapter 只能把外部模组状态投影为有限输入（Molang query / controller predicate /
+render-context hint）——**动画本身必须由模型包自带**。
+
+因此装了 YSM 时：
+
+- ✅ 菜单、按键接受、HUD 提示、精确落位、移动锁、人称切换与恢复、双击 Shift 强制结束——**全部照常**；
+- ❌ **拥抱姿势不会显示在 YSM 模型上**：本模组的动画基于 Player Animator，作用于原版模型骨骼。
+  要让 YSM 玩家有拥抱动作，只能由**该模型包的作者**在模型内补一段动画；
+- ⚙️ YSM 模型没有原版动画那 1 格身体位移，阴影本来就正确，所以模组**检测到 YSM 时会自动跳过
+  阴影 / nametag 隐藏**（配置项 `hide_shadow_and_nametag_with_ysm`，默认 `false`，需要可改 `true`）。
+  检测只依赖模组 id `yes_steve_model`，**不需要任何 YSM 编译期依赖**，且探针异常会被吞掉、不影响模组运行。
+
+> 给 YSM 模型作者：等 YSM 3.0 的扩展 API 稳定后，可按其 adapter 边界把「正在拥抱」作为
+> render-context hint / Molang 输入暴露给模型包，再由模型内的 controller 播放对应动画。
